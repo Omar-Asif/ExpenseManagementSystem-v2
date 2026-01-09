@@ -1,0 +1,227 @@
+@model ExpenseManagementSystem.ViewModels.Admin.UserDetailsViewModel
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a asp-action="Index">Users</a></li>
+            <li class="breadcrumb-item active">@Model.FullName</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row g-4">
+    <!-- User Profile Card -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--primary-hover)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                    <span class="text-white fs-2 fw-bold">@Model.FullName[0]</span>
+                </div>
+                <h5 class="mb-1">@Model.FullName</h5>
+                <p class="text-muted mb-3">@Model.Email</p>
+                
+                @if (Model.IsActive)
+                {
+                    <span class="badge badge-success mb-3">
+                        <i class="bi bi-check-circle me-1"></i>Active Account
+                    </span>
+                }
+                else
+                {
+                    <span class="badge badge-danger mb-3">
+                        <i class="bi bi-x-circle me-1"></i>Inactive Account
+                    </span>
+                }
+
+                <hr />
+                
+                <div class="text-start">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary">Member Since</span>
+                        <span class="fw-medium">@Model.CreatedAt.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary">Email Verified</span>
+                        <span class="@(Model.EmailConfirmed ? "text-success" : "text-warning")">
+                            @(Model.EmailConfirmed ? "Yes" : "No")
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-secondary">Total Transactions</span>
+                        <span class="fw-medium">@Model.TotalTransactions</span>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="d-grid gap-2">
+                    <a asp-action="ToggleStatus" asp-route-id="@Model.Id" 
+                       class="btn @(Model.IsActive ? "btn-warning" : "btn-success")">
+                        <i class="bi bi-@(Model.IsActive ? "person-dash" : "person-check") me-1"></i>
+                        @(Model.IsActive ? "Deactivate User" : "Activate User")
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Users
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Overview -->
+    <div class="col-lg-8">
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card stats-card">
+                    <div class="stats-icon success">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div class="stats-label">Total Income</div>
+                    <div class="stats-value">$@Model.TotalIncome.ToString("N2")</div>
+                    <div class="stats-change">
+                        <span class="text-muted">@Model.IncomeCount transactions</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card stats-card">
+                    <div class="stats-icon danger">
+                        <i class="bi bi-graph-down-arrow"></i>
+                    </div>
+                    <div class="stats-label">Total Expenses</div>
+                    <div class="stats-value">$@Model.TotalExpense.ToString("N2")</div>
+                    <div class="stats-change">
+                        <span class="text-muted">@Model.ExpenseCount transactions</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card stats-card">
+                    <div class="stats-icon primary">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div class="stats-label">Balance</div>
+                    <div class="stats-value @(Model.Balance >= 0 ? "text-success" : "text-danger")">
+                        $@Model.Balance.ToString("N2")
+                    </div>
+                    <div class="stats-change">
+                        <span class="text-muted">Net worth</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card stats-card">
+                    <div class="stats-icon warning">
+                        <i class="bi bi-piggy-bank"></i>
+                    </div>
+                    <div class="stats-label">Budgets</div>
+                    <div class="stats-value">@Model.BudgetCount</div>
+                    <div class="stats-change">
+                        <span class="text-muted">Active budgets</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Summary -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">This Month's Activity</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="text-muted small">Monthly Income</div>
+                        <div class="fs-4 fw-bold text-success">$@Model.MonthlyIncome.ToString("N2")</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Monthly Expenses</div>
+                        <div class="fs-4 fw-bold text-danger">$@Model.MonthlyExpense.ToString("N2")</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Monthly Balance</div>
+                        @{
+                            var monthlyBalance = Model.MonthlyIncome - Model.MonthlyExpense;
+                        }
+                        <div class="fs-4 fw-bold @(monthlyBalance >= 0 ? "text-success" : "text-danger")">
+                            $@monthlyBalance.ToString("N2")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Transactions</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.RecentTransactions.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Transaction</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in Model.RecentTransactions)
+                                {
+                                    var isIncome = transaction.Type == "Income";
+                                    var iconClass = isIncome ? "arrow-up-circle" : "arrow-down-circle";
+                                    var colorClass = isIncome ? "success" : "danger";
+                                    
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3" style="width: 36px; height: 36px; background: var(--@colorClass-light); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-@iconClass text-@colorClass"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="fw-medium">@transaction.Title</span>
+                                                    <br /><small class="text-muted">@transaction.Type</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(transaction.Category))
+                                            {
+                                                <span class="badge badge-primary">@transaction.Category</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="text-@colorClass fw-semibold">
+                                                @(isIncome ? "+" : "-")$@transaction.Amount.ToString("N2")
+                                            </span>
+                                        </td>
+                                        <td>@transaction.Date.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2 mb-0">No transactions yet</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

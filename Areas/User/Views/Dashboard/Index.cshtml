@@ -1,0 +1,226 @@
+@model ExpenseManagementSystem.ViewModels.Dashboard.UserDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var incomeChangeClass = Model.IncomeChangePercentage >= 0 ? "positive" : "negative";
+    var incomeChangeIcon = Model.IncomeChangePercentage >= 0 ? "arrow-up" : "arrow-down";
+    var expenseChangeClass = Model.ExpenseChangePercentage <= 0 ? "positive" : "negative";
+    var expenseChangeIcon = Model.ExpenseChangePercentage >= 0 ? "arrow-up" : "arrow-down";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Welcome back!</h4>
+        <p class="text-secondary mb-0">Here's your financial overview for @Model.MonthName @Model.CurrentYear</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Income" asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-lg me-1"></i> Add Income
+        </a>
+        <a asp-controller="Expense" asp-action="Create" class="btn btn-danger">
+            <i class="bi bi-dash-lg me-1"></i> Add Expense
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon success">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div class="stats-label">Total Income</div>
+            <div class="stats-value">$@Model.TotalIncome.ToString("N2")</div>
+            <div class="stats-change @incomeChangeClass">
+                <i class="bi bi-@incomeChangeIcon"></i> 
+                @Math.Abs(Model.IncomeChangePercentage).ToString("N1")% from last month
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon danger">
+                <i class="bi bi-graph-down-arrow"></i>
+            </div>
+            <div class="stats-label">Total Expenses</div>
+            <div class="stats-value">$@Model.TotalExpense.ToString("N2")</div>
+            <div class="stats-change @expenseChangeClass">
+                <i class="bi bi-@expenseChangeIcon"></i>
+                @Math.Abs(Model.ExpenseChangePercentage).ToString("N1")% from last month
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon primary">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="stats-label">Remaining Balance</div>
+            <div class="stats-value @(Model.RemainingBalance >= 0 ? "" : "text-danger")">
+                $@Model.RemainingBalance.ToString("N2")
+            </div>
+            <div class="stats-change @(Model.RemainingBalance >= 0 ? "positive" : "negative")">
+                <i class="bi bi-@(Model.RemainingBalance >= 0 ? "check-circle" : "exclamation-circle")"></i>
+                @(Model.RemainingBalance >= 0 ? "On track" : "Over spending")
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon warning">
+                <i class="bi bi-piggy-bank"></i>
+            </div>
+            <div class="stats-label">Budget Used</div>
+            <div class="stats-value">@Model.BudgetUsedPercentage.ToString("N1")%</div>
+            @{
+                var budgetStatus = Model.BudgetUsedPercentage >= 100 ? "Over budget" : 
+                                   Model.BudgetUsedPercentage >= 80 ? "Near limit" : "Under budget";
+                var budgetClass = Model.BudgetUsedPercentage >= 100 ? "negative" : 
+                                  Model.BudgetUsedPercentage >= 80 ? "text-warning" : "positive";
+            }
+            <div class="stats-change @budgetClass">
+                <i class="bi bi-@(Model.BudgetUsedPercentage < 80 ? "check-circle" : "exclamation-circle")"></i>
+                @budgetStatus
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent Transactions -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Recent Transactions</h5>
+                <div>
+                    <a asp-controller="Income" asp-action="Index" class="btn btn-sm btn-secondary me-1">Income</a>
+                    <a asp-controller="Expense" asp-action="Index" class="btn btn-sm btn-secondary">Expenses</a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.RecentTransactions.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Transaction</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in Model.RecentTransactions)
+                                {
+                                    var isIncome = transaction.Type == "Income";
+                                    var iconClass = isIncome ? "arrow-up-circle" : "arrow-down-circle";
+                                    var colorClass = isIncome ? "success" : "danger";
+                                    var bgClass = isIncome ? "success-light" : "danger-light";
+                                    
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3" style="width: 40px; height: 40px; background: var(--@bgClass); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-@iconClass text-@colorClass"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="fw-medium">@transaction.Title</span>
+                                                    <br /><small class="text-muted">@transaction.Type</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(transaction.Category))
+                                            {
+                                                <span class="badge badge-primary">@transaction.Category</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="text-@colorClass fw-semibold">
+                                                @(isIncome ? "+" : "-")$@transaction.Amount.ToString("N2")
+                                            </span>
+                                        </td>
+                                        <td>@transaction.Date.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3 mb-0">No transactions yet</p>
+                        <p class="text-secondary small">Add your first income or expense to get started</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions & Summary -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-controller="Income" asp-action="Create" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-2"></i>Add Income
+                    </a>
+                    <a asp-controller="Expense" asp-action="Create" class="btn btn-danger">
+                        <i class="bi bi-dash-circle me-2"></i>Add Expense
+                    </a>
+                    <a asp-controller="Budget" asp-action="Index" class="btn btn-primary">
+                        <i class="bi bi-piggy-bank me-2"></i>Manage Budget
+                    </a>
+                    <a asp-controller="Reports" asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-file-earmark-bar-graph me-2"></i>View Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Summary -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">@Model.MonthName Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-secondary">Transactions</span>
+                    <span class="fw-semibold">@Model.TransactionCount</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-secondary">Categories Used</span>
+                    <span class="fw-semibold">@Model.CategoriesUsed</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-secondary">Budget Allocated</span>
+                    <span class="fw-semibold">$@Model.TotalBudget.ToString("N2")</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary">Savings Rate</span>
+                    <span class="fw-semibold @(Model.SavingsRate >= 0 ? "text-success" : "text-danger")">
+                        @Model.SavingsRate.ToString("N1")%
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

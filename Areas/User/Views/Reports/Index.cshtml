@@ -1,0 +1,267 @@
+@model ExpenseManagementSystem.ViewModels.Reports.ReportIndexViewModel
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Financial Reports</h4>
+        <p class="text-secondary mb-0">View and download your financial reports</p>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-calendar-month text-primary me-2"></i>@Model.MonthName @Model.CurrentYear
+                </h5>
+                <div>
+                    <a asp-action="Monthly" asp-route-month="@Model.CurrentMonth" asp-route-year="@Model.CurrentYear" 
+                       class="btn btn-sm btn-secondary me-1">
+                        <i class="bi bi-eye me-1"></i>Details
+                    </a>
+                    <a asp-action="DownloadMonthly" asp-route-month="@Model.CurrentMonth" asp-route-year="@Model.CurrentYear" 
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-download me-1"></i>PDF
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <div class="text-muted small">Income</div>
+                        <div class="fs-5 fw-bold text-success">$@Model.MonthlyIncome.ToString("N2")</div>
+                        <small class="text-muted">@Model.MonthlyIncomeCount transactions</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Expenses</div>
+                        <div class="fs-5 fw-bold text-danger">$@Model.MonthlyExpense.ToString("N2")</div>
+                        <small class="text-muted">@Model.MonthlyExpenseCount transactions</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Balance</div>
+                        <div class="fs-5 fw-bold @(Model.MonthlyBalance >= 0 ? "text-success" : "text-danger")">
+                            $@Model.MonthlyBalance.ToString("N2")
+                        </div>
+                        <small class="text-muted">@Model.MonthlySavingsRate.ToString("N1")% savings</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-calendar text-info me-2"></i>Year @Model.CurrentYear
+                </h5>
+                <div>
+                    <a asp-action="Yearly" asp-route-year="@Model.CurrentYear" class="btn btn-sm btn-secondary me-1">
+                        <i class="bi bi-eye me-1"></i>Details
+                    </a>
+                    <a asp-action="DownloadYearly" asp-route-year="@Model.CurrentYear" class="btn btn-sm btn-info">
+                        <i class="bi bi-download me-1"></i>PDF
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <div class="text-muted small">Income</div>
+                        <div class="fs-5 fw-bold text-success">$@Model.YearlyIncome.ToString("N2")</div>
+                        <small class="text-muted">@Model.YearlyIncomeCount transactions</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Expenses</div>
+                        <div class="fs-5 fw-bold text-danger">$@Model.YearlyExpense.ToString("N2")</div>
+                        <small class="text-muted">@Model.YearlyExpenseCount transactions</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Balance</div>
+                        <div class="fs-5 fw-bold @(Model.YearlyBalance >= 0 ? "text-success" : "text-danger")">
+                            $@Model.YearlyBalance.ToString("N2")
+                        </div>
+                        <small class="text-muted">@Model.YearlySavingsRate.ToString("N1")% savings</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Reports Section -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Generate Monthly Report
+                </h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="DownloadMonthly" method="get" class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label">Month</label>
+                        <select name="month" class="form-select">
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                var monthName = new DateTime(2000, i, 1).ToString("MMMM");
+                                <option value="@i" selected="@(Model.CurrentMonth == i)">@monthName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Year</label>
+                        <select name="year" class="form-select">
+                            @foreach (var year in Model.AvailableYears)
+                            {
+                                <option value="@year" selected="@(Model.CurrentYear == year)">@year</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-download me-1"></i> Download
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-file-earmark-pdf text-info me-2"></i>Generate Yearly Report
+                </h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="DownloadYearly" method="get" class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label class="form-label">Year</label>
+                        <select name="year" class="form-select">
+                            @foreach (var year in Model.AvailableYears)
+                            {
+                                <option value="@year" selected="@(Model.CurrentYear == year)">@year</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-info w-100">
+                            <i class="bi bi-download me-1"></i> Download
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Monthly Trends -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Monthly Trends - @Model.CurrentYear</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th class="text-end">Income</th>
+                                <th class="text-end">Expenses</th>
+                                <th class="text-end">Balance</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var month in Model.MonthlyTrends)
+                            {
+                                var hasData = month.Income > 0 || month.Expense > 0;
+                                <tr class="@(!hasData ? "text-muted" : "")">
+                                    <td>@month.MonthName</td>
+                                    <td class="text-end text-success">$@month.Income.ToString("N2")</td>
+                                    <td class="text-end text-danger">$@month.Expense.ToString("N2")</td>
+                                    <td class="text-end @(month.Balance >= 0 ? "text-success" : "text-danger")">
+                                        $@month.Balance.ToString("N2")
+                                    </td>
+                                    <td class="text-center">
+                                        @if (hasData)
+                                        {
+                                            <a asp-action="Monthly" asp-route-month="@month.Month" asp-route-year="@month.Year" 
+                                               class="btn btn-sm btn-secondary me-1" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="DownloadMonthly" asp-route-month="@month.Month" asp-route-year="@month.Year" 
+                                               class="btn btn-sm btn-primary" title="Download PDF">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold" style="background: var(--bg-secondary);">
+                                <td>Total</td>
+                                <td class="text-end text-success">$@Model.YearlyIncome.ToString("N2")</td>
+                                <td class="text-end text-danger">$@Model.YearlyExpense.ToString("N2")</td>
+                                <td class="text-end @(Model.YearlyBalance >= 0 ? "text-success" : "text-danger")">
+                                    $@Model.YearlyBalance.ToString("N2")
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">@Model.MonthName Expenses by Category</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.ExpenseByCategory.Any())
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var category in Model.ExpenseByCategory.Take(8))
+                        {
+                            var barColor = category.Percentage > 30 ? "danger" : 
+                                           category.Percentage > 15 ? "warning" : "primary";
+                            <li class="list-group-item" style="background: transparent; border-color: var(--border-color);">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-medium">@category.Category</span>
+                                    <span class="text-danger">$@category.Amount.ToString("N2")</span>
+                                </div>
+                                <div class="progress" style="height: 4px;">
+                                    <div class="progress-bar bg-@barColor" style="width: @category.Percentage%"></div>
+                                </div>
+                                <small class="text-muted">@category.Percentage.ToString("N1")% • @category.Count transactions</small>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-pie-chart text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2 mb-0">No expenses this month</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

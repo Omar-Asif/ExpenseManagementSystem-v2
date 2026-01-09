@@ -1,0 +1,331 @@
+@model ExpenseManagementSystem.ViewModels.Admin.AdminAnalyticsViewModel
+@{
+    ViewData["Title"] = "System Analytics";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">System Analytics</h4>
+        <p class="text-secondary mb-0">Comprehensive overview of system performance</p>
+    </div>
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+    </a>
+</div>
+
+<!-- Overview Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon primary">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stats-label">Total Users</div>
+            <div class="stats-value">@Model.TotalUsers</div>
+            <div class="stats-change @(Model.UserGrowthRate >= 0 ? "positive" : "negative")">
+                <i class="bi bi-@(Model.UserGrowthRate >= 0 ? "arrow-up" : "arrow-down")"></i>
+                @Math.Abs(Model.UserGrowthRate).ToString("N1")% growth
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon info">
+                <i class="bi bi-arrow-left-right"></i>
+            </div>
+            <div class="stats-label">Total Transactions</div>
+            <div class="stats-value">@Model.TotalTransactions</div>
+            <div class="stats-change">
+                <span class="text-success">@Model.IncomeTransactions income</span> / 
+                <span class="text-danger">@Model.ExpenseTransactions expense</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon success">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stats-label">System Income</div>
+            <div class="stats-value">$@Model.TotalSystemIncome.ToString("N0")</div>
+            <div class="stats-change @(Model.IncomeGrowthRate >= 0 ? "positive" : "negative")">
+                <i class="bi bi-@(Model.IncomeGrowthRate >= 0 ? "arrow-up" : "arrow-down")"></i>
+                @Math.Abs(Model.IncomeGrowthRate).ToString("N1")% vs last month
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon danger">
+                <i class="bi bi-receipt"></i>
+            </div>
+            <div class="stats-label">System Expenses</div>
+            <div class="stats-value">$@Model.TotalSystemExpense.ToString("N0")</div>
+            <div class="stats-change @(Model.ExpenseGrowthRate <= 0 ? "positive" : "negative")">
+                <i class="bi bi-@(Model.ExpenseGrowthRate >= 0 ? "arrow-up" : "arrow-down")"></i>
+                @Math.Abs(Model.ExpenseGrowthRate).ToString("N1")% vs last month
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Comparison -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Monthly Comparison</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-6 text-center border-end">
+                        <h6 class="text-muted mb-2">This Month</h6>
+                        <div class="mb-2">
+                            <span class="text-success fs-5 fw-bold">$@Model.CurrentMonthIncome.ToString("N2")</span>
+                            <small class="text-muted d-block">Income</small>
+                        </div>
+                        <div>
+                            <span class="text-danger fs-5 fw-bold">$@Model.CurrentMonthExpense.ToString("N2")</span>
+                            <small class="text-muted d-block">Expenses</small>
+                        </div>
+                    </div>
+                    <div class="col-6 text-center">
+                        <h6 class="text-muted mb-2">Last Month</h6>
+                        <div class="mb-2">
+                            <span class="text-success fs-5 fw-bold">$@Model.LastMonthIncome.ToString("N2")</span>
+                            <small class="text-muted d-block">Income</small>
+                        </div>
+                        <div>
+                            <span class="text-danger fs-5 fw-bold">$@Model.LastMonthExpense.ToString("N2")</span>
+                            <small class="text-muted d-block">Expenses</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center pt-3 border-top">
+                    <h6 class="text-muted mb-2">System Balance</h6>
+                    <span class="fs-3 fw-bold @(Model.SystemBalance >= 0 ? "text-success" : "text-danger")">
+                        $@Model.SystemBalance.ToString("N2")
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">6-Month Trend</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.MonthlyTrends.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th class="text-success">Income</th>
+                                    <th class="text-danger">Expense</th>
+                                    <th>New Users</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var trend in Model.MonthlyTrends)
+                                {
+                                    <tr>
+                                        <td>@trend.MonthName @trend.Year</td>
+                                        <td class="text-success">$@trend.TotalIncome.ToString("N0")</td>
+                                        <td class="text-danger">$@trend.TotalExpense.ToString("N0")</td>
+                                        <td><span class="badge badge-info">@trend.NewUsers</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Breakdown & Top Users -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Expense by Category</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.ExpenseByCategory.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var category in Model.ExpenseByCategory)
+                                {
+                                    var barColor = category.Percentage > 20 ? "danger" : 
+                                                   category.Percentage > 10 ? "warning" : "primary";
+                                    <tr>
+                                        <td>
+                                            <span class="fw-medium">@category.Category</span>
+                                            <br /><small class="text-muted">@category.TransactionCount transactions</small>
+                                        </td>
+                                        <td class="fw-semibold">$@category.TotalAmount.ToString("N2")</td>
+                                        <td style="min-width: 120px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="progress flex-grow-1" style="height: 6px;">
+                                                    <div class="progress-bar bg-@barColor" style="width: @category.Percentage%"></div>
+                                                </div>
+                                                <small>@category.Percentage.ToString("N1")%</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-pie-chart text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2 mb-0">No expense data yet</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="row g-4">
+            <!-- Top Users by Income -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-graph-up-arrow text-success me-2"></i>Top Earners
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (Model.TopUsersByIncome.Any())
+                        {
+                            <ul class="list-group list-group-flush">
+                                @foreach (var user in Model.TopUsersByIncome)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background: transparent; border-color: var(--border-color);">
+                                        <div>
+                                            <span class="fw-medium">@user.FullName</span>
+                                            <br /><small class="text-muted">@user.TransactionCount transactions</small>
+                                        </div>
+                                        <span class="text-success fw-semibold">$@user.Amount.ToString("N2")</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <div class="text-center py-3">
+                                <p class="text-muted mb-0">No data available</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <!-- Top Users by Expense -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-graph-down-arrow text-danger me-2"></i>Top Spenders
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (Model.TopUsersByExpense.Any())
+                        {
+                            <ul class="list-group list-group-flush">
+                                @foreach (var user in Model.TopUsersByExpense)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background: transparent; border-color: var(--border-color);">
+                                        <div>
+                                            <span class="fw-medium">@user.FullName</span>
+                                            <br /><small class="text-muted">@user.TransactionCount transactions</small>
+                                        </div>
+                                        <span class="text-danger fw-semibold">$@user.Amount.ToString("N2")</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <div class="text-center py-3">
+                                <p class="text-muted mb-0">No data available</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="d-inline-flex align-items-center justify-content-center mb-2" 
+                     style="width: 48px; height: 48px; background: var(--success-light); border-radius: 0.75rem;">
+                    <i class="bi bi-person-check text-success fs-4"></i>
+                </div>
+                <h3 class="mb-0">@Model.ActiveUsers</h3>
+                <p class="text-muted mb-0">Active Users</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="d-inline-flex align-items-center justify-content-center mb-2" 
+                     style="width: 48px; height: 48px; background: var(--primary-light); border-radius: 0.75rem;">
+                    <i class="bi bi-person-plus text-primary fs-4"></i>
+                </div>
+                <h3 class="mb-0">@Model.NewUsersThisMonth</h3>
+                <p class="text-muted mb-0">New This Month</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="d-inline-flex align-items-center justify-content-center mb-2" 
+                     style="width: 48px; height: 48px; background: var(--warning-light); border-radius: 0.75rem;">
+                    <i class="bi bi-piggy-bank text-warning fs-4"></i>
+                </div>
+                <h3 class="mb-0">@Model.BudgetsCreated</h3>
+                <p class="text-muted mb-0">Budgets Created</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="d-inline-flex align-items-center justify-content-center mb-2" 
+                     style="width: 48px; height: 48px; background: var(--info-light); border-radius: 0.75rem;">
+                    <i class="bi bi-graph-up text-info fs-4"></i>
+                </div>
+                @{
+                    var avgTransactionsPerUser = Model.TotalUsers > 0 
+                        ? ((double)Model.TotalTransactions / Model.TotalUsers) 
+                        : 0;
+                }
+                <h3 class="mb-0">@avgTransactionsPerUser.ToString("N1")</h3>
+                <p class="text-muted mb-0">Avg Transactions/User</p>
+            </div>
+        </div>
+    </div>
+</div>

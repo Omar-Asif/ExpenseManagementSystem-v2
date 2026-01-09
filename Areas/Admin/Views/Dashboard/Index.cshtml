@@ -1,0 +1,266 @@
+@model ExpenseManagementSystem.ViewModels.Admin.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Admin Dashboard</h4>
+        <p class="text-secondary mb-0">System overview for @Model.MonthName @Model.CurrentYear</p>
+    </div>
+    <div>
+        <a asp-controller="Users" asp-action="Index" class="btn btn-primary">
+            <i class="bi bi-people me-1"></i> Manage Users
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon primary">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stats-label">Total Users</div>
+            <div class="stats-value">@Model.TotalUsers</div>
+            <div class="stats-change positive">
+                <i class="bi bi-plus"></i> @Model.NewUsersThisMonth new this month
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon success">
+                <i class="bi bi-person-check"></i>
+            </div>
+            <div class="stats-label">Active Users</div>
+            <div class="stats-value">@Model.ActiveUsers</div>
+            <div class="stats-change positive">
+                <i class="bi bi-check-circle"></i> 
+                @(Model.TotalUsers > 0 ? ((double)Model.ActiveUsers / Model.TotalUsers * 100).ToString("N0") : "0")% active
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon warning">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stats-label">Total System Income</div>
+            <div class="stats-value">$@Model.TotalSystemIncome.ToString("N2")</div>
+            <div class="stats-change">
+                <i class="bi bi-graph-up"></i> All users combined
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon danger">
+                <i class="bi bi-receipt"></i>
+            </div>
+            <div class="stats-label">Total System Expenses</div>
+            <div class="stats-value">$@Model.TotalSystemExpense.ToString("N2")</div>
+            <div class="stats-change">
+                <i class="bi bi-graph-down"></i> All users combined
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="d-inline-flex align-items-center justify-content-center mb-3" 
+                     style="width: 56px; height: 56px; background: var(--info-light); border-radius: 0.75rem;">
+                    <i class="bi bi-arrow-left-right text-info fs-4"></i>
+                </div>
+                <h3 class="mb-1">@Model.TotalTransactions</h3>
+                <p class="text-secondary mb-0">Total Transactions</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="d-inline-flex align-items-center justify-content-center mb-3" 
+                     style="width: 56px; height: 56px; background: var(--primary-light); border-radius: 0.75rem;">
+                    <i class="bi bi-piggy-bank text-primary fs-4"></i>
+                </div>
+                <h3 class="mb-1">@Model.TotalBudgets</h3>
+                <p class="text-secondary mb-0">Active Budgets</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="d-inline-flex align-items-center justify-content-center mb-3" 
+                     style="width: 56px; height: 56px; background: var(--success-light); border-radius: 0.75rem;">
+                    <i class="bi bi-wallet2 text-success fs-4"></i>
+                </div>
+                <h3 class="mb-1 @(Model.TotalSystemBalance >= 0 ? "text-success" : "text-danger")">
+                    $@Model.TotalSystemBalance.ToString("N2")
+                </h3>
+                <p class="text-secondary mb-0">System Balance</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent Users -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Recent Users</h5>
+                <a asp-controller="Users" asp-action="Index" class="btn btn-sm btn-secondary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.RecentUsers.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Joined</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model.RecentUsers)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3" style="width: 36px; height: 36px; background: var(--primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <span class="text-primary fw-semibold">@user.FullName[0]</span>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-medium">@user.FullName</div>
+                                                    <small class="text-muted">@user.Email</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@user.JoinedDate.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            @if (user.IsActive)
+                                            {
+                                                <span class="badge badge-success">
+                                                    <i class="bi bi-check-circle me-1"></i>Active
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-danger">
+                                                    <i class="bi bi-x-circle me-1"></i>Inactive
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-people text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2 mb-0">No users registered yet</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Active Users -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Most Active Users</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.TopActiveUsers.Any(u => u.TransactionCount > 0))
+                {
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Transactions</th>
+                                    <th>Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model.TopActiveUsers.Where(u => u.TransactionCount > 0))
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3" style="width: 36px; height: 36px; background: var(--warning-light); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <span class="text-warning fw-semibold">@user.FullName[0]</span>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-medium">@user.FullName</div>
+                                                    <small class="text-muted">@user.Email</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-info">@user.TransactionCount</span></td>
+                                        <td class="fw-semibold">$@user.TotalAmount.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-activity text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2 mb-0">No transaction activity yet</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a asp-controller="Users" asp-action="Index" class="btn btn-primary w-100">
+                            <i class="bi bi-people me-2"></i>Manage Users
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a asp-controller="Users" asp-action="Active" class="btn btn-success w-100">
+                            <i class="bi bi-person-check me-2"></i>Active Users (@Model.ActiveUsers)
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a asp-controller="Users" asp-action="Inactive" class="btn btn-danger w-100">
+                            <i class="bi bi-person-x me-2"></i>Inactive Users (@Model.InactiveUsers)
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a asp-controller="Analytics" asp-action="Index" class="btn btn-info w-100">
+                            <i class="bi bi-graph-up me-2"></i>View Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,332 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<style>
+    /* Hero Section */
+    .hero-section {
+        padding: 6rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-title .gradient-text {
+        background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        max-width: 600px;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-image {
+        position: relative;
+    }
+
+    .hero-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-card .stat-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .hero-card .stat-row:last-child {
+        border-bottom: none;
+    }
+
+    .hero-card .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .hero-card .stat-value {
+        font-weight: 700;
+        font-size: 1.125rem;
+    }
+
+    .hero-card .stat-value.income {
+        color: #10b981;
+    }
+
+    .hero-card .stat-value.expense {
+        color: #ef4444;
+    }
+
+    .hero-card .stat-value.balance {
+        color: #6366f1;
+    }
+
+    /* Features Section */
+    .features-section {
+        padding: 5rem 0;
+        background: rgba(30, 41, 59, 0.3);
+    }
+
+    .section-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+        color: var(--text-secondary);
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto 3rem;
+    }
+
+    .feature-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 2rem;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        border-color: #6366f1;
+        box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
+    }
+
+    .feature-icon {
+        width: 56px;
+        height: 56px;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .feature-icon i {
+        font-size: 1.5rem;
+        color: #6366f1;
+    }
+
+    .feature-card h4 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .feature-card p {
+        color: var(--text-secondary);
+        font-size: 0.9375rem;
+        margin: 0;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        padding: 5rem 0;
+        text-align: center;
+    }
+
+    .cta-card {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 1.5rem;
+        padding: 4rem 2rem;
+    }
+
+    .cta-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .cta-card p {
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.25rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+
+        .hero-buttons {
+            justify-content: center;
+        }
+
+        .hero-image {
+            margin-top: 3rem;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="hero-title">
+                    Take Control of Your <span class="gradient-text">Finances</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Track expenses, manage income, plan budgets, and gain insights into your spending habits with our powerful expense management system.
+                </p>
+                <div class="hero-buttons">
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Get Started Free
+                    </a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 offset-lg-1 hero-image">
+                <div class="hero-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="me-3" style="width: 48px; height: 48px; background: linear-gradient(135deg, #6366f1, #4f46e5); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-wallet2 text-white"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Financial Overview</h5>
+                            <small class="text-secondary">December 2026</small>
+                        </div>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label"><i class="bi bi-arrow-up-circle me-2 text-success"></i>Total Income</span>
+                        <span class="stat-value income">$12,580.00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label"><i class="bi bi-arrow-down-circle me-2 text-danger"></i>Total Expenses</span>
+                        <span class="stat-value expense">$8,245.50</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label"><i class="bi bi-piggy-bank me-2 text-primary"></i>Remaining Balance</span>
+                        <span class="stat-value balance">$4,334.50</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="features">
+    <div class="container">
+        <h2 class="section-title">Powerful Features</h2>
+        <p class="section-subtitle">Everything you need to manage your personal finances effectively and make smarter financial decisions.</p>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <h4>Income Tracking</h4>
+                    <p>Easily track all your income sources and monitor your earnings over time with detailed insights.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                    <h4>Expense Management</h4>
+                    <p>Categorize and track every expense to understand where your money goes each month.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-piggy-bank"></i>
+                    </div>
+                    <h4>Budget Planning</h4>
+                    <p>Set monthly budgets for different categories and stay on track with your financial goals.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-bar-chart-line"></i>
+                    </div>
+                    <h4>Visual Analytics</h4>
+                    <p>Beautiful charts and graphs to visualize your financial data and spending patterns.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                    </div>
+                    <h4>PDF Reports</h4>
+                    <p>Generate comprehensive PDF reports for monthly and yearly financial summaries.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h4>Secure & Private</h4>
+                    <p>Your financial data is protected with industry-standard security measures.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-card">
+            <h2>Ready to Take Control?</h2>
+            <p>Join thousands of users who are already managing their finances smarter with ExpenseManager.</p>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">
+                <i class="bi bi-person-plus me-2"></i>Create Free Account
+            </a>
+        </div>
+    </div>
+</section>

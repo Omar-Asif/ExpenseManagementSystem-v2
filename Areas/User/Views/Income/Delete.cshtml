@@ -1,0 +1,59 @@
+@model ExpenseManagementSystem.ViewModels.Income.IncomeListViewModel
+@{
+    ViewData["Title"] = "Delete Income";
+}
+
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a asp-action="Index">Income</a></li>
+            <li class="breadcrumb-item active">Delete Income</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Are you sure you want to delete this income record? This action cannot be undone.
+                </div>
+
+                <div class="bg-dark rounded p-3 mb-4">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-secondary">Title</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.Title</dd>
+
+                        <dt class="col-sm-4 text-secondary">Amount</dt>
+                        <dd class="col-sm-8 text-success fw-semibold">+$@Model.Amount.ToString("N2")</dd>
+
+                        <dt class="col-sm-4 text-secondary">Date</dt>
+                        <dd class="col-sm-8">@Model.Date.ToString("MMMM dd, yyyy")</dd>
+
+                        <dt class="col-sm-4 text-secondary">Description</dt>
+                        <dd class="col-sm-8">@(Model.Description ?? "No description")</dd>
+                    </dl>
+                </div>
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i> Delete Income
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-lg me-1"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

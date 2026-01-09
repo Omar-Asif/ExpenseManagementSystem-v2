@@ -1,0 +1,315 @@
+@model ExpenseManagementSystem.ViewModels.Reports.MonthlyReportDetailViewModel
+@{
+    ViewData["Title"] = $"Monthly Report - {Model.MonthName} {Model.Year}";
+    var availableMonths = ViewBag.AvailableMonths as IEnumerable<dynamic>;
+    var availableYears = ViewBag.AvailableYears as List<int>;
+}
+
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a asp-action="Index">Reports</a></li>
+            <li class="breadcrumb-item active">@Model.MonthName @Model.Year</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">@Model.MonthName @Model.Year Report</h4>
+        <p class="text-secondary mb-0">Detailed monthly financial report for @Model.UserName</p>
+    </div>
+    <a asp-action="DownloadMonthly" asp-route-month="@Model.Month" asp-route-year="@Model.Year" class="btn btn-primary">
+        <i class="bi bi-download me-1"></i> Download PDF
+    </a>
+</div>
+
+<!-- Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Month</label>
+                <select name="month" class="form-select">
+                    @if (availableMonths != null)
+                    {
+                        @foreach (var m in availableMonths)
+                        {
+                            <option value="@m.Value" selected="@(Model.Month == (int)m.Value)">@m.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Year</label>
+                <select name="year" class="form-select">
+                    @if (availableYears != null)
+                    {
+                        @foreach (var year in availableYears)
+                        {
+                            <option value="@year" selected="@(Model.Year == year)">@year</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="bi bi-funnel me-1"></i> View Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon success">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div class="stats-label">Total Income</div>
+            <div class="stats-value">$@Model.TotalIncome.ToString("N2")</div>
+            <div class="stats-change">
+                @Model.Incomes.Count transactions
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon danger">
+                <i class="bi bi-graph-down-arrow"></i>
+            </div>
+            <div class="stats-label">Total Expenses</div>
+            <div class="stats-value">$@Model.TotalExpense.ToString("N2")</div>
+            <div class="stats-change">
+                @Model.Expenses.Count transactions
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon primary">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="stats-label">Balance</div>
+            <div class="stats-value @(Model.Balance >= 0 ? "text-success" : "text-danger")">
+                $@Model.Balance.ToString("N2")
+            </div>
+            <div class="stats-change @(Model.SavingsRate >= 0 ? "positive" : "negative")">
+                @Model.SavingsRate.ToString("N1")% savings rate
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon warning">
+                <i class="bi bi-piggy-bank"></i>
+            </div>
+            <div class="stats-label">Budget Status</div>
+            <div class="stats-value">@Model.BudgetUsedPercentage.ToString("N0")%</div>
+            <div class="stats-change">
+                $@Model.BudgetUsed.ToString("N0") of $@Model.TotalBudget.ToString("N0")
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Budget Overview -->
+    @if (Model.Budgets.Any())
+    {
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Budget Overview</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th class="text-end">Budget</th>
+                                    <th class="text-end">Spent</th>
+                                    <th>Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var budget in Model.Budgets)
+                                {
+                                    var percentage = Math.Min(budget.UsedPercentage, 100);
+                                    var barColor = budget.IsOverBudget ? "danger" : 
+                                                   percentage >= 80 ? "warning" : "success";
+                                    <tr>
+                                        <td>@budget.Category</td>
+                                        <td class="text-end">$@budget.PlannedAmount.ToString("N2")</td>
+                                        <td class="text-end text-danger">$@budget.SpentAmount.ToString("N2")</td>
+                                        <td style="min-width: 120px;">
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar bg-@barColor" style="width: @percentage%"></div>
+                                            </div>
+                                            <small class="@(budget.IsOverBudget ? "text-danger" : "")">@percentage.ToString("N0")%</small>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Category Breakdown -->
+    <div class="col-lg-@(Model.Budgets.Any() ? "6" : "12")">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Expenses by Category</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.ExpenseByCategory.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-end">Count</th>
+                                    <th class="text-end">Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var category in Model.ExpenseByCategory)
+                                {
+                                    <tr>
+                                        <td>@category.Category</td>
+                                        <td class="text-end text-danger fw-semibold">$@category.Amount.ToString("N2")</td>
+                                        <td class="text-end">@category.Count</td>
+                                        <td class="text-end">@category.Percentage.ToString("N1")%</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">No expenses this month</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transactions -->
+<div class="row g-4 mt-2">
+    <!-- Income Transactions -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-arrow-up-circle text-success me-2"></i>Income Transactions
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.Incomes.Any())
+                {
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Title</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var income in Model.Incomes)
+                                {
+                                    <tr>
+                                        <td>@income.Date.ToString("MMM dd")</td>
+                                        <td>
+                                            @income.Title
+                                            @if (!string.IsNullOrEmpty(income.Description))
+                                            {
+                                                <br /><small class="text-muted">@income.Description</small>
+                                            }
+                                        </td>
+                                        <td class="text-end text-success fw-semibold">+$@income.Amount.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold" style="background: var(--bg-secondary);">
+                                    <td colspan="2">Total</td>
+                                    <td class="text-end text-success">$@Model.TotalIncome.ToString("N2")</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">No income this month</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Transactions -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-arrow-down-circle text-danger me-2"></i>Expense Transactions
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.Expenses.Any())
+                {
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var expense in Model.Expenses)
+                                {
+                                    <tr>
+                                        <td>@expense.Date.ToString("MMM dd")</td>
+                                        <td>@expense.Title</td>
+                                        <td><span class="badge badge-primary">@expense.Category</span></td>
+                                        <td class="text-end text-danger fw-semibold">-$@expense.Amount.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold" style="background: var(--bg-secondary);">
+                                    <td colspan="3">Total</td>
+                                    <td class="text-end text-danger">$@Model.TotalExpense.ToString("N2")</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">No expenses this month</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,277 @@
+@model ExpenseManagementSystem.ViewModels.Analytics.UserAnalyticsViewModel
+@{
+    ViewData["Title"] = "Analytics";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Analytics</h4>
+        <p class="text-secondary mb-0">Financial insights for @Model.MonthName @Model.CurrentYear</p>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon success">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div class="stats-label">Monthly Income</div>
+            <div class="stats-value">$@Model.TotalIncome.ToString("N2")</div>
+            <div class="stats-change @(Model.IncomeGrowthRate >= 0 ? "positive" : "negative")">
+                <i class="bi bi-@(Model.IncomeGrowthRate >= 0 ? "arrow-up" : "arrow-down")"></i>
+                @Math.Abs(Model.IncomeGrowthRate).ToString("N1")% vs last month
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon danger">
+                <i class="bi bi-graph-down-arrow"></i>
+            </div>
+            <div class="stats-label">Monthly Expenses</div>
+            <div class="stats-value">$@Model.TotalExpense.ToString("N2")</div>
+            <div class="stats-change @(Model.ExpenseGrowthRate <= 0 ? "positive" : "negative")">
+                <i class="bi bi-@(Model.ExpenseGrowthRate >= 0 ? "arrow-up" : "arrow-down")"></i>
+                @Math.Abs(Model.ExpenseGrowthRate).ToString("N1")% vs last month
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon primary">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="stats-label">Savings Rate</div>
+            <div class="stats-value @(Model.SavingsRate >= 0 ? "text-success" : "text-danger")">
+                @Model.SavingsRate.ToString("N1")%
+            </div>
+            <div class="stats-change">
+                $@Model.Balance.ToString("N2") saved
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stats-card">
+            <div class="stats-icon warning">
+                <i class="bi bi-piggy-bank"></i>
+            </div>
+            <div class="stats-label">Budget Utilization</div>
+            <div class="stats-value">@Model.BudgetUtilization.ToString("N0")%</div>
+            <div class="stats-change">
+                @Model.BudgetsOnTrack on track / @Model.BudgetsOverspent over
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Insights Section -->
+@if (Model.Insights.Any())
+{
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-lightbulb text-warning me-2"></i>Financial Insights
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                @foreach (var insight in Model.Insights)
+                {
+                    var alertClass = insight.Type switch
+                    {
+                        "success" => "alert-success",
+                        "warning" => "alert-warning",
+                        "danger" => "alert-danger",
+                        _ => "alert-info"
+                    };
+                    <div class="col-md-6">
+                        <div class="alert @alertClass mb-0">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-@insight.Icon me-3 fs-4"></i>
+                                <div>
+                                    <strong>@insight.Title</strong>
+                                    <p class="mb-0 small">@insight.Description</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row g-4 mb-4">
+    <!-- Monthly Trends -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">6-Month Trend</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th class="text-end">Income</th>
+                                <th class="text-end">Expenses</th>
+                                <th class="text-end">Balance</th>
+                                <th class="text-end">Savings %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var month in Model.MonthlyTrends)
+                            {
+                                <tr>
+                                    <td>@month.MonthName @month.Year</td>
+                                    <td class="text-end text-success">$@month.Income.ToString("N2")</td>
+                                    <td class="text-end text-danger">$@month.Expense.ToString("N2")</td>
+                                    <td class="text-end @(month.Balance >= 0 ? "text-success" : "text-danger")">
+                                        $@month.Balance.ToString("N2")
+                                    </td>
+                                    <td class="text-end @(month.SavingsRate >= 0 ? "text-success" : "text-danger")">
+                                        @month.SavingsRate.ToString("N1")%
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Averages -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Daily Averages</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary">Avg Daily Income</span>
+                        <span class="text-success fw-bold">$@Model.AverageDailyIncome.ToString("N2")</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        @{
+                            var maxAvg = Math.Max(Model.AverageDailyIncome, Model.AverageDailyExpense);
+                            var incomeWidth = maxAvg > 0 ? (Model.AverageDailyIncome / maxAvg) * 100 : 0;
+                        }
+                        <div class="progress-bar bg-success" style="width: @incomeWidth%"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary">Avg Daily Expense</span>
+                        <span class="text-danger fw-bold">$@Model.AverageDailyExpense.ToString("N2")</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        @{
+                            var expenseWidth = maxAvg > 0 ? (Model.AverageDailyExpense / maxAvg) * 100 : 0;
+                        }
+                        <div class="progress-bar bg-danger" style="width: @expenseWidth%"></div>
+                    </div>
+                </div>
+                <hr />
+                <div class="text-center">
+                    <div class="text-secondary small">Projected Monthly Balance</div>
+                    @{
+                        var projectedBalance = (Model.AverageDailyIncome - Model.AverageDailyExpense) * 30;
+                    }
+                    <div class="fs-4 fw-bold @(projectedBalance >= 0 ? "text-success" : "text-danger")">
+                        $@projectedBalance.ToString("N2")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Trends -->
+@if (Model.CategoryTrends.Any())
+{
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Category Comparison (This Month vs Last Month)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th class="text-end">This Month</th>
+                            <th class="text-end">Last Month</th>
+                            <th class="text-end">Change</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in Model.CategoryTrends)
+                        {
+                            var changeColor = category.IsIncreased ? "danger" : "success";
+                            var changeIcon = category.IsIncreased ? "arrow-up" : "arrow-down";
+                            
+                            <tr>
+                                <td class="fw-medium">@category.Category</td>
+                                <td class="text-end">$@category.CurrentMonth.ToString("N2")</td>
+                                <td class="text-end text-muted">$@category.LastMonth.ToString("N2")</td>
+                                <td class="text-end text-@changeColor">
+                                    <i class="bi bi-@changeIcon"></i>
+                                    @Math.Abs(category.ChangePercentage).ToString("N1")%
+                                </td>
+                                <td>
+                                    @{
+                                        var diff = category.CurrentMonth - category.LastMonth;
+                                    }
+                                    <span class="@(diff > 0 ? "text-danger" : diff < 0 ? "text-success" : "text-muted")">
+                                        @(diff > 0 ? "+" : "")$@diff.ToString("N2")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Daily Activity -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Daily Activity - @Model.MonthName @Model.CurrentYear</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-2">
+            @foreach (var day in Model.DailyTrends)
+            {
+                var hasActivity = day.Income > 0 || day.Expense > 0;
+                var dayBalance = day.Income - day.Expense;
+                var bgClass = !hasActivity ? "secondary" : 
+                              dayBalance > 0 ? "success" : 
+                              dayBalance < 0 ? "danger" : "warning";
+                var opacity = hasActivity ? "1" : "0.3";
+                
+                <div class="col-auto">
+                    <div class="text-center" style="width: 40px;" 
+                         title="@day.Date.ToString("MMM dd"): Income $@day.Income.ToString("N2"), Expense $@day.Expense.ToString("N2")">
+                        <div class="rounded p-2 bg-@bgClass" style="opacity: @opacity;">
+                            <span class="text-white small">@day.Day</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="mt-3 d-flex gap-3 justify-content-center">
+            <span><span class="badge bg-success">&nbsp;</span> Positive</span>
+            <span><span class="badge bg-danger">&nbsp;</span> Negative</span>
+            <span><span class="badge bg-warning">&nbsp;</span> Break-even</span>
+            <span><span class="badge bg-secondary" style="opacity: 0.3;">&nbsp;</span> No activity</span>
+        </div>
+    </div>
+</div>

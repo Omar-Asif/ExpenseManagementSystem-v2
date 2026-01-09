@@ -1,0 +1,170 @@
+@model ExpenseManagementSystem.ViewModels.Budget.BudgetIndexViewModel
+@{
+    ViewData["Title"] = "Budget Planner";
+    var monthName = new DateTime(Model.FilterYear, Model.FilterMonth, 1).ToString("MMMM yyyy");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Budget Planner</h4>
+        <p class="text-secondary mb-0">Plan and track your monthly spending limits</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Add Budget
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Filter & Summary Section -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <form method="get" class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label">Month</label>
+                        <select name="month" class="form-select">
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                var mName = new DateTime(2000, i, 1).ToString("MMMM");
+                                <option value="@i" selected="@(Model.FilterMonth == i)">@mName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Year</label>
+                        <select name="year" class="form-select">
+                            @for (int i = DateTime.Today.Year; i >= DateTime.Today.Year - 5; i--)
+                            {
+                                <option value="@i" selected="@(Model.FilterYear == i)">@i</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-funnel me-1"></i> Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-secondary mb-3">@monthName Summary</h6>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="text-muted small">Planned</div>
+                        <div class="fs-5 fw-bold text-primary">$@Model.TotalPlanned.ToString("N2")</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Spent</div>
+                        <div class="fs-5 fw-bold text-danger">$@Model.TotalSpent.ToString("N2")</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Remaining</div>
+                        <div class="fs-5 fw-bold @(Model.TotalRemaining >= 0 ? "text-success" : "text-danger")">
+                            $@Model.TotalRemaining.ToString("N2")
+                        </div>
+                    </div>
+                </div>
+                @if (Model.TotalPlanned > 0)
+                {
+                    var percentage = Math.Min((double)Model.TotalSpent / (double)Model.TotalPlanned * 100, 100);
+                    var barColor = percentage >= 100 ? "bg-danger" : percentage >= 80 ? "bg-warning" : "bg-success";
+                    <div class="progress mt-3" style="height: 8px;">
+                        <div class="progress-bar @barColor" style="width: @percentage%"></div>
+                    </div>
+                    <small class="text-muted">@percentage.ToString("N1")% of budget used</small>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Budget List -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Budget Categories for @monthName</h5>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Budgets.Any())
+        {
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Planned</th>
+                            <th>Spent</th>
+                            <th>Remaining</th>
+                            <th>Progress</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var budget in Model.Budgets)
+                        {
+                            var percentage = Math.Min(budget.PercentageUsed, 100);
+                            var barColor = budget.IsOverBudget ? "bg-danger" : percentage >= 80 ? "bg-warning" : "bg-success";
+                            var statusText = budget.IsOverBudget ? "Over Budget!" : percentage >= 80 ? "Near Limit" : "On Track";
+                            var statusClass = budget.IsOverBudget ? "text-danger" : percentage >= 80 ? "text-warning" : "text-success";
+                            
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3" style="width: 40px; height: 40px; background: var(--primary-light); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-piggy-bank text-primary"></i>
+                                        </div>
+                                        <span class="fw-medium">@budget.Category</span>
+                                    </div>
+                                </td>
+                                <td class="fw-semibold">$@budget.PlannedAmount.ToString("N2")</td>
+                                <td class="text-danger">$@budget.SpentAmount.ToString("N2")</td>
+                                <td class="@(budget.RemainingAmount >= 0 ? "text-success" : "text-danger") fw-semibold">
+                                    $@budget.RemainingAmount.ToString("N2")
+                                </td>
+                                <td style="min-width: 150px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 6px;">
+                                            <div class="progress-bar @barColor" style="width: @percentage%"></div>
+                                        </div>
+                                        <small class="@statusClass" style="width: 45px;">@percentage.ToString("N0")%</small>
+                                    </div>
+                                    <small class="@statusClass">@statusText</small>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="Edit" asp-route-id="@budget.Id" class="btn btn-sm btn-secondary me-1" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@budget.Id" class="btn btn-sm btn-danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-piggy-bank text-muted" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-3 mb-0">No budgets set for @monthName</p>
+                <p class="text-secondary small">Create budgets to track your spending limits</p>
+                <a asp-action="Create" class="btn btn-primary mt-2">
+                    <i class="bi bi-plus-lg me-1"></i> Create Budget
+                </a>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,87 @@
+@model ExpenseManagementSystem.ViewModels.Admin.ToggleUserStatusViewModel
+@{
+    ViewData["Title"] = Model.IsActive ? "Deactivate User" : "Activate User";
+    var actionVerb = Model.IsActive ? "deactivate" : "activate";
+    var actionColor = Model.IsActive ? "warning" : "success";
+    var actionIcon = Model.IsActive ? "person-dash" : "person-check";
+}
+
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a asp-action="Index">Users</a></li>
+            <li class="breadcrumb-item active">@(Model.IsActive ? "Deactivate" : "Activate") User</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-@actionColor">
+            <div class="card-header bg-@actionColor text-@(Model.IsActive ? "dark" : "white")">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-@actionIcon me-2"></i>Confirm @(Model.IsActive ? "Deactivation" : "Activation")
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.IsActive)
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> Deactivating this user will prevent them from logging in to the system.
+                        Their data will be preserved but they won't be able to access their account.
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-success">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Note:</strong> Activating this user will allow them to log in and access the system again.
+                    </div>
+                }
+
+                <div class="bg-dark rounded p-4 mb-4 text-center">
+                    <div class="mb-3" style="width: 64px; height: 64px; background: var(--primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                        <span class="text-primary fs-3 fw-bold">@Model.FullName[0]</span>
+                    </div>
+                    <h5 class="mb-1">@Model.FullName</h5>
+                    <p class="text-muted mb-2">@Model.Email</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <span class="text-secondary">Current Status:</span>
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge badge-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger">Inactive</span>
+                        }
+                        <i class="bi bi-arrow-right text-muted"></i>
+                        <span class="text-secondary">New Status:</span>
+                        @if (Model.NewStatus)
+                        {
+                            <span class="badge badge-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger">Inactive</span>
+                        }
+                    </div>
+                </div>
+
+                <form asp-action="ToggleStatusConfirmed" method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-@actionColor">
+                            <i class="bi bi-@actionIcon me-1"></i> 
+                            @(Model.IsActive ? "Deactivate User" : "Activate User")
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-lg me-1"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
