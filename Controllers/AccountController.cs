@@ -24,11 +24,13 @@ namespace ExpenseManagementSystem.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public async Task<IActionResult> Login(string? returnUrl = null)
         {
+            // Sign out current user if authenticated, allowing account switching
             if (User.Identity?.IsAuthenticated == true)
             {
-                return RedirectToAppropriateArea();
+                await _signInManager.SignOutAsync();
+                _logger.LogInformation("User signed out to switch accounts.");
             }
 
             ViewData["ReturnUrl"] = returnUrl;
@@ -89,11 +91,13 @@ namespace ExpenseManagementSystem.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register()
+        public async Task<IActionResult> Register()
         {
+            // Sign out current user if authenticated, allowing account switching
             if (User.Identity?.IsAuthenticated == true)
             {
-                return RedirectToAppropriateArea();
+                await _signInManager.SignOutAsync();
+                _logger.LogInformation("User signed out to register new account.");
             }
 
             return View();

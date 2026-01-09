@@ -104,6 +104,7 @@ namespace ExpenseManagementSystem.Areas.User.Controllers
             };
 
             _context.Incomes.Add(income);
+            
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Income created: {Title} - {Amount} by user {UserId}", 
